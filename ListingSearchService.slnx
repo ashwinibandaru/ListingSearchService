@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ListingSearchData/ListingSearchData.csproj" />
+  <Project Path="ListingSearchEngine/ListingSearchEngine.csproj" />
+  <Project Path="ListingSearchModels/ListingSearchModels.csproj" />
+  <Project Path="ListingSearchService/ListingSearchService.csproj" />
+</Solution>

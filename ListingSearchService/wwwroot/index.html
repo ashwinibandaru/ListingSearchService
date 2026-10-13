@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Listing Search</title>
+  <style>
+    body{font-family:Segoe UI,Arial;margin:20px}
+    label{display:inline-block;width:110px}
+    input,select{margin:4px}
+    table{border-collapse:collapse;width:100%;margin-top:12px}
+    th,td{border:1px solid #ddd;padding:8px}
+    th{background:#f3f3f3;text-align:left}
+    .error{color:#b00020}
+  </style>
+</head>
+<body>
+  <h2>Listing Search</h2>
+  <div id="controls">
+    <div>
+      <label>minPrice</label><input id="minPrice" type="number" />
+      <label>maxPrice</label><input id="maxPrice" type="number" />
+      <label>minBedrooms</label><input id="minBedrooms" type="number" min="0" />
+    </div>
+    <div>
+      <label>city</label><input id="city" type="text" />
+      <label>keyword</label><input id="keyword" type="text" />
+      <label>targetBudget</label><input id="targetBudget" type="number" />
+    </div>
+    <div>
+      <label>pageSize</label><input id="pageSize" type="number" value="5" min="1" style="width:60px" />
+      <button id="searchBtn">Search</button>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <div id="results"></div>
+
+  <script>
+    const el = id=>document.getElementById(id);
+    async function doSearch(page=1){
+      el('status').textContent='Loading...';
+      el('results').innerHTML='';
+      const params = new URLSearchParams();
+      ['minPrice','maxPrice','minBedrooms','city','keyword','targetBudget','pageSize'].forEach(k=>{
+        const v = el(k).value; if (v) params.set(k,v);
+      });
+      params.set('page',page);
+      try{
+        const res = await fetch('/api/search?'+params.toString());
+        if (!res.ok){
+          const err = await res.json(); el('status').innerHTML = '<div class="error">Error: '+(err.error||res.statusText)+'</div>'; return;
+        }
+        const data = await res.json();
+        renderResults(data);
+      }catch(e){
+        el('status').innerHTML = '<div class="error">Network error</div>';
+      }
+    }
+
+    function renderResults(data){
+      el('status').textContent = '';
+      if (!data || !data.items || data.items.length===0){
+        el('results').innerHTML = '<div>No results</div>'; return;
+      }
+      const table = document.createElement('table');
+      table.innerHTML = '<tr><th>Address</th><th>Price</th><th>Bedrooms</th><th>Listed</th><th>Score</th></tr>';
+      data.items.forEach(it=>{
+        const r = document.createElement('tr');
+        r.innerHTML = `<td>${escapeHtml(it.listing.address)}</td><td>$${Number(it.listing.price).toLocaleString()}</td><td>${it.listing.bedrooms}</td><td>${new Date(it.listing.listedDate).toLocaleDateString()}</td><td>${it.score}</td>`;
+        table.appendChild(r);
+      });
+      const pager = document.createElement('div');
+      pager.style.marginTop='8px';
+      const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
+      pager.innerHTML = `Page ${data.page} of ${totalPages} `;
+      if (data.page>1) pager.innerHTML += `<button id="prev">Prev</button>`;
+      if (data.page<totalPages) pager.innerHTML += `<button id="next">Next</button>`;
+
+      el('results').appendChild(table);
+      el('results').appendChild(pager);
+      if (el('prev')) el('prev').addEventListener('click',()=>doSearch(data.page-1));
+      if (el('next')) el('next').addEventListener('click',()=>doSearch(data.page+1));
+    }
+
+    function escapeHtml(str){
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
+    }
+
+    el('searchBtn').addEventListener('click',()=>doSearch(1));
+  </script>
+</body>
+</html>
