@@ -21,7 +21,7 @@ builder.Services.AddSingleton<SearchService>();
 // Configure scoring options from configuration
 builder.Services.Configure<ListingSearchEngine.Config.ScoringOptions>(builder.Configuration.GetSection("Scoring"));
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Removed AddOpenApi to rely on Swashbuckle for Swagger/OpenAPI generation
 
 var app = builder.Build();
 
@@ -47,7 +47,6 @@ app.UseExceptionHandler(errorApp =>
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
@@ -58,13 +57,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
-
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Serve SPA index
-app.MapFallbackToFile("index.html");
+// SPA/static file hosting removed - front-end will be a separate application
 
 app.Run();
