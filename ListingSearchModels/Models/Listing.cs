@@ -10,6 +10,7 @@ namespace ListingSearchModels.Models
         public string Id { get; init; } = string.Empty;
         public string Source { get; init; } = string.Empty;
         public string Address { get; init; } = string.Empty;
+        public string City { get; init; } = string.Empty;
         public decimal Price { get; init; }
         public int Bedrooms { get; init; }
         public double Bathrooms { get; init; }

@@ -45,12 +45,17 @@ namespace ListingSearchEngine.Search
 
                 if (!string.IsNullOrWhiteSpace(parameters.City))
                 {
-                    q = q.Where(x => !string.IsNullOrWhiteSpace(x.Address) && x.Address.IndexOf(parameters.City, StringComparison.OrdinalIgnoreCase) >= 0);
+                    q = q.Where(x => !string.IsNullOrWhiteSpace(x.City) && x.City.IndexOf(parameters.City, StringComparison.OrdinalIgnoreCase) >= 0);
                 }
 
                 if (!string.IsNullOrWhiteSpace(parameters.Keyword))
                 {
                     q = q.Where(x => !string.IsNullOrWhiteSpace(x.Description) && x.Description.IndexOf(parameters.Keyword, StringComparison.OrdinalIgnoreCase) >= 0);
+                }
+
+                if (parameters.TargetBudget.HasValue)
+                {
+                    q = q.Where(x => x.Price >= parameters.TargetBudget.Value);
                 }
 
                 return q;
